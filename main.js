@@ -1,69 +1,92 @@
+
 var todolist = [];
 
+var div = Widget.div("container");
+document.body.append(div.el);
 
-var inputValue = Widget.getControl("todoInput");
+div.append(Widget.input("todo-contents"));
+div.append(
+  Widget.button("todo-input", {
+    label: "입력",
+    onClick: function () {
+      var contentsControl = Widget.getControl("todo-contents");
+      var value = contentsControl.getValue();
 
-var onClickSave = function () {
-    if (!inputValue()) {
-      alert("할 일을 입력해 주세요");
-      return;
-    }
-    todolist.push({
-      id: crypto.randomUUID(),
-      contents: input.getValue(),
-      done: false,
-    });
-  };
+      if (!value) {
+        alert("할일을 입력해 주세요");
+        return;
+      }
 
-function renderColumnDone(id, option) {
-    var checkboxEl = Widget.input(id, option);
-    checkboxEl.el.type = "checkbox";
+      todolist.push({
+        id: crypto.randomUUID(),
+        contents: value,
+        done: false,
+      });
+      Widget.getControl("todo-list").reload(getSortedTodoList({ done: false })); 
+      Widget.getControl("done-list").reload(getSortedTodoList({ done: true })); 
 
-    return checkboxEl
+      contentsControl.clear();
+      contentsControl.focus();
+    },
+  })
+);
+
+div.append(Widget.list("todo-list", {
+  datas: getSortedTodoList({ done: false }),
+  columns: [
+    { id: "done", render: renderColumnDone },
+    { id: "todo", render: renderColumnTodo },
+    { id: "delete", render: renderColumnDelete },
+],
+}))
+
+div.append(Widget.list("done-list", {
+  datas: getSortedTodoList({ done: true }),
+  columns: [
+    { id: "done", render: renderColumnDone },
+    { id: "todo", render: renderColumnTodo },
+    { id: "delete", render: renderColumnDelete },
+],
+}))
+
+function renderColumnDone(data) {
+  var checkControl = Widget.checkbox("checkbox-" + data.id, {
+    label: "체크박스",
+
+    done: data.done,
+    onChange: function (e) {
+    data.done = e.target.checked; 
+    Widget.getControl("todo-list").reload(getSortedTodoList({ done: false })); 
+    Widget.getControl("done-list").reload(getSortedTodoList({ done: true }));      
+    },
+  });
+ return checkControl;
 }
 
-function renderColumnTodo(id, option) {
-    var spanEl = Widget.span(id, option);
-
-    parentEl.append(spanEl.el);
+function renderColumnTodo(data) {
+  var spanControl = Widget.span("span-" + data.id, {
+    label: "span",
+    content: data.contents,
+  });
+  return spanControl;
 }
 
-function renderColumnDelete(id, option){
-    var delBtn = Widget.button(id, option);
-
-    parentEl.append(delBtn.el);
-}
-
-
-function render() {
-    var root = document.getElementById("contents");
-    var div = Widget.div("container", { parent: root });
-
-    div.append(Widget.input("todoInput"));
-    div.append(Widget.button("btnSave", { content: "입력", onClick: onClickSave }));
-    div.append(
-        Widget.list("todoList", {
-            datas: todolist.filter(function(item) {return !item.done}),
-            columns: [
-                { id: "done", render: renderColumnDone },
-                { id: "todo", render: renderColumnTodo },
-                { id: "delete", render: renderColumnDelete },
-            ],
-        })
-    );
-    div.append(
-        Widget.list("todoListDone", {
-            datas: todolist.filter(function(item) {return item.done}),
-            columns: [
-                { id: "done", render: renderColumnDone },
-                { id: "todo", render: renderColumnTodo },
-                { id: "delete", render: renderColumnDelete },
-            ],
-        })
-    );
+function renderColumnDelete(data) {
+  var delBtnContrl = Widget.button("delbtn-" + data.id, {
+    label: "삭제",
+    onClick: function () {
+      todolist.splice(todolist.indexOf(data), 1);
+      Widget.getControl("todo-list").reload(getSortedTodoList({ done: false })); 
+      Widget.getControl("done-list").reload(getSortedTodoList({ done: true })); 
+    },
+  });
+  return delBtnContrl;
 }
 
 
+Widget.getControl("todo-list").reload(todolist);
 
-render();
 
+function getSortedTodoList(option) {
+  return todolist.filter(item => item.done === option.done) // true > done
+}

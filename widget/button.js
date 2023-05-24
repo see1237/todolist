@@ -1,15 +1,19 @@
-export function createButton(id, option) {
-    var el = document.createElement("button");
-    el.id = id;
-    el.textContent = option.content;
-    el.onclick = option.onClick;
+import { widget } from "./baseWidget";
+import { removeControl } from "./core";
 
-    return {     
-        el: el,
-    };
+function _createButton(id, option) {
+  var el = document.createElement("button");
+  el.textContent = option.label;
+  el.onclick = option.onClick;
+
+  return {
+    id: id,
+    el: el,
+    dispose: function () {
+      el.remove();
+      removeControl(id);
+    },
+  };
 }
 
-
-
-
-  
+export var createButton = widget(_createButton);

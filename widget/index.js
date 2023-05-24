@@ -1,22 +1,17 @@
 import { createButton } from "./button";
-import { createList } from "./list";
-import { createInput } from "./input";
+import { getControl } from "./core";
 import { createDiv } from "./div";
+import { createInput } from "./input";
+import { createList } from "./list";
 import { createSpan } from "./span";
+import { createCheckbox } from "./checkbox";
 
 window.Widget = {
-    button: createButton,
-    list: createList,
-    input: createInput,
-    div: createDiv,
-    span: createSpan,
-    getControl: function(id) {
-        var el = document.getElementById(id);
-        el.focus();
-        return el.value;
-    }
-  };
-
-
-
-  
+  button: createButton,
+  list: createList,
+  input: createInput,
+  div: createDiv,
+  span: createSpan,
+  checkbox: createCheckbox,
+  getControl: getControl,
+};

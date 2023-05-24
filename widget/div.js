@@ -1,14 +1,15 @@
-export function createDiv (id, option) {
-    var el = document.createElement("div");
-    el.id = id;
+import { addControl } from "./core";
 
-    option.parent.append(el);
+export function createDiv(id) {
+  var el = document.createElement("div");
 
-    return {
-        el: el,
-        append: function (child){
-            el.append(child.el);
-        }
-    };
+  var control = {
+    id: id,
+    el: el,
+    append: function (control) {
+      el.append(control.el);
+    },
+  };
+  addControl(control);
+  return control;
 }
-  
