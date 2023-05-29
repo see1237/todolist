@@ -1,6 +1,7 @@
 import { addControl } from "./core";
+import { widget } from "./baseWidget";
 
-export function createDiv(id) {
+export function _createDiv(id) {
   var el = document.createElement("div");
 
   var control = {
@@ -13,3 +14,5 @@ export function createDiv(id) {
   addControl(control);
   return control;
 }
+
+export var createDiv = widget(_createDiv);

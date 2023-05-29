@@ -1,53 +1,58 @@
 
 var todolist = [];
 
-var div = Widget.div("container");
-document.body.append(div.el);
+function render() {
+  var div = Widget.div("container");
+  document.body.append(div.el);
 
-div.append(Widget.input("todo-contents"));
-div.append(
-  Widget.button("todo-input", {
-    label: "입력",
-    onClick: function () {
-      var contentsControl = Widget.getControl("todo-contents");
-      var value = contentsControl.getValue();
+  div.append(Widget.input("todo-contents"));
+  div.append(Widget.button("todo-input", { label: "입력", onClick: onClickSave }));
 
-      if (!value) {
-        alert("할일을 입력해 주세요");
-        return;
-      }
+  div.append(Widget.list("todo-list", {
+    datas: getSortedTodoList({ done: false }),
+    columns: [
+      { id: "done", render: renderColumnDone },
+      { id: "todo", render: renderColumnTodo },
+      { id: "delete", render: renderColumnDelete },
+    ],
+  }))
 
-      todolist.push({
-        id: crypto.randomUUID(),
-        contents: value,
-        done: false,
-      });
-      Widget.getControl("todo-list").reload(getSortedTodoList({ done: false })); 
-      Widget.getControl("done-list").reload(getSortedTodoList({ done: true })); 
+  div.append(Widget.list("done-list", {
+    datas: getSortedTodoList({ done: true }),
+    columns: [
+      { id: "done", render: renderColumnDone },
+      { id: "todo", render: renderColumnTodo },
+      { id: "delete", render: renderColumnDelete },
+    ],
+  }))
+  Widget.getControl("todo-list").reload(todolist);
+}
 
-      contentsControl.clear();
-      contentsControl.focus();
-    },
-  })
-);
+render();
 
-div.append(Widget.list("todo-list", {
-  datas: getSortedTodoList({ done: false }),
-  columns: [
-    { id: "done", render: renderColumnDone },
-    { id: "todo", render: renderColumnTodo },
-    { id: "delete", render: renderColumnDelete },
-],
-}))
 
-div.append(Widget.list("done-list", {
-  datas: getSortedTodoList({ done: true }),
-  columns: [
-    { id: "done", render: renderColumnDone },
-    { id: "todo", render: renderColumnTodo },
-    { id: "delete", render: renderColumnDelete },
-],
-}))
+function onClickSave() {
+  var contentsControl = Widget.getControl("todo-contents");
+  var value = contentsControl.getValue();
+
+  if (!value) {
+    alert("할일을 입력해 주세요");
+    return;
+  }
+
+  todolist.push({
+    id: crypto.randomUUID(),
+    contents: value,
+    done: false,
+  });
+  Widget.getControl("todo-list").reload(getSortedTodoList({ done: false })); 
+  Widget.getControl("done-list").reload(getSortedTodoList({ done: true })); 
+
+  contentsControl.clear();
+  contentsControl.focus();
+}
+
+
 
 function renderColumnDone(data) {
   var checkControl = Widget.checkbox("checkbox-" + data.id, {
@@ -82,10 +87,6 @@ function renderColumnDelete(data) {
   });
   return delBtnContrl;
 }
-
-
-Widget.getControl("todo-list").reload(todolist);
-
 
 function getSortedTodoList(option) {
   return todolist.filter(item => item.done === option.done) // true > done
